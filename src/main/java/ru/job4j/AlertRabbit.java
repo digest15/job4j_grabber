@@ -4,6 +4,8 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
@@ -11,13 +13,20 @@ import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
+
+    private static final String CONFIG_PATH = "rabbit.properties";
+    private static final String RABBIT_INTERVAL = "rabbit.interval";
     public static void main(String[] args) {
         try {
+            Properties cfg = readConfig(CONFIG_PATH);
+            String strInterval = cfg.getProperty(RABBIT_INTERVAL);
+            int interval = strInterval == null ? 0 : Integer.parseInt(strInterval);
+
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDetail job = newJob(Rabbit.class).build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(getInterval())
+                    .withIntervalInSeconds(interval)
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -40,13 +49,12 @@ public class AlertRabbit {
      * @return 0 if value isn't set
      * @throws Exception if something was wrong
      */
-    public static int getInterval() throws Exception {
-        int interval;
-        try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            Properties cfg = new Properties();
+    public static Properties readConfig(String configPath) throws Exception {
+        Properties cfg;
+        try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream(configPath)) {
+            cfg = new Properties();
             cfg.load(in);
-            interval = Integer.parseInt(cfg.getProperty("rabbit.interval", "0"));
         }
-        return interval;
+        return cfg;
     }
 }
