@@ -4,8 +4,6 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
