@@ -9,35 +9,45 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.IntStream;
 
 public class HabrCareerParse {
     private static final String SOURCE_LINK = "https://career.habr.com";
 
-    private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
+    private static final String PAGE_LINK = String.format("%s/vacancies/java_developer?page=", SOURCE_LINK);
 
     public static void main(String[] args) throws IOException {
-        Connection connection = Jsoup.connect(PAGE_LINK);
-        Document document = connection.get();
-        Elements rows = document.select(".vacancy-card__inner");
+        IntStream.range(1, 6)
+                 .forEach(HabrCareerParse::parsePage);
+    }
 
-        DateTimeParser dateTimeParser = new HabrCareerDateTimeParser();
-        rows.forEach(row -> {
-            Element titleElement = row.select(".vacancy-card__title").first();
-            String vacancyName = titleElement.text();
+    private static void parsePage(int pageNumber) {
+        Connection connection = Jsoup.connect(PAGE_LINK + pageNumber);
+        try {
+            Document document = connection.get();
+            Elements rows = document.select(".vacancy-card__inner");
 
-            Element linkElement = titleElement.child(0);
-            String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+            DateTimeParser dateTimeParser = new HabrCareerDateTimeParser();
+            rows.forEach(row -> {
+                Element titleElement = row.select(".vacancy-card__title").first();
+                String vacancyName = titleElement.text();
 
-            Element dateElement = row.select(".vacancy-card__date")
-                    .first()
-                    .child(0);
-            LocalDateTime datetime = dateTimeParser.parse(dateElement.attr("datetime"));
+                Element linkElement = titleElement.child(0);
+                String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
 
-            System.out.printf("%s; %s; %s%n",
-                    vacancyName,
-                    datetime.format(DateTimeFormatter.ISO_DATE_TIME),
-                    link);
-        });
+                Element dateElement = row.select(".vacancy-card__date")
+                        .first()
+                        .child(0);
+                LocalDateTime datetime = dateTimeParser.parse(dateElement.attr("datetime"));
+
+                System.out.printf("%s; %s; %s%n",
+                        vacancyName,
+                        datetime.format(DateTimeFormatter.ISO_DATE_TIME),
+                        link);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class HabrCareerDateTimeParser implements DateTimeParser {
