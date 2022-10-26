@@ -7,8 +7,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class HabrCareerParse {
     private static final String SOURCE_LINK = "https://career.habr.com";
@@ -26,12 +24,7 @@ public class HabrCareerParse {
             Element linkElement = titleElement.child(0);
             String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
 
-            Element dateElement = row.select(".vacancy-card__date")
-                    .first()
-                    .child(0);
-            LocalDateTime datetime = LocalDateTime.parse(dateElement.attr("datetime"), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
-            System.out.printf("%s; %s; %s%n", vacancyName, datetime.format(DateTimeFormatter.ISO_DATE), link);
+            System.out.printf("%s %s%n", vacancyName, link);
         });
     }
 }
