@@ -19,6 +19,8 @@ public class HabrCareerParse {
         Connection connection = Jsoup.connect(PAGE_LINK);
         Document document = connection.get();
         Elements rows = document.select(".vacancy-card__inner");
+
+        DateTimeParser dateTimeParser = new HabrCareerDateTimeParser();
         rows.forEach(row -> {
             Element titleElement = row.select(".vacancy-card__title").first();
             String vacancyName = titleElement.text();
@@ -29,9 +31,19 @@ public class HabrCareerParse {
             Element dateElement = row.select(".vacancy-card__date")
                     .first()
                     .child(0);
-            LocalDateTime datetime = LocalDateTime.parse(dateElement.attr("datetime"), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            LocalDateTime datetime = dateTimeParser.parse(dateElement.attr("datetime"));
 
-            System.out.printf("%s; %s; %s%n", vacancyName, datetime.format(DateTimeFormatter.ISO_DATE), link);
+            System.out.printf("%s; %s; %s%n",
+                    vacancyName,
+                    datetime.format(DateTimeFormatter.ISO_DATE_TIME),
+                    link);
         });
+    }
+
+    private static class HabrCareerDateTimeParser implements DateTimeParser {
+        @Override
+        public LocalDateTime parse(String dateInString) {
+            return LocalDateTime.parse(dateInString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        }
     }
 }
