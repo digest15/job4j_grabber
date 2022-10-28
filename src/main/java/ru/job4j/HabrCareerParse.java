@@ -5,6 +5,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.job4j.datetimeparsers.DateTimeParser;
+import ru.job4j.datetimeparsers.HabrCareerDateTimeParser;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -47,13 +49,6 @@ public class HabrCareerParse {
             });
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private static class HabrCareerDateTimeParser implements DateTimeParser {
-        @Override
-        public LocalDateTime parse(String dateInString) {
-            return LocalDateTime.parse(dateInString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
     }
 }
