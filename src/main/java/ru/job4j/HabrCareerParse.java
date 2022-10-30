@@ -59,7 +59,7 @@ public class HabrCareerParse {
     }
 
     private static String retrieveDescription(String link) {
-        StringJoiner description = new StringJoiner(System.lineSeparator());
+        StringJoiner description = new StringJoiner("");
         try {
             Connection connection = Jsoup.connect(link);
             Document document = connection.get();
@@ -79,16 +79,21 @@ public class HabrCareerParse {
             boolean needSpace = false;
             if (node instanceof TextNode) {
                 String value = ((TextNode) node).text();
-                if (value.equals(" ")) {
+                if (((Element) ((TextNode) node).parentNode()).tag().getName().equals("li")) {
+                    text.add("- " + value);
+                    text.add(System.lineSeparator());
+                    needSpace = false;
+                } else {
                     if (needSpace) {
                         text.add(" ");
                     }
-                    text.add(value);
+                    if (value.equals(" ")) {
+                        text.add(System.lineSeparator());
+                        text.add(System.lineSeparator());
+                    } else {
+                        text.add(value);
+                    }
                     needSpace = true;
-                } else if (((Element) ((TextNode) node).parentNode()).tag().getName().equals("li")) {
-                    text.add("- ");
-                    text.add(value);
-                    needSpace = false;
                 }
             }
         }
