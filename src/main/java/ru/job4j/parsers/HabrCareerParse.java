@@ -1,4 +1,4 @@
-package ru.job4j;
+package ru.job4j.parsers;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -8,7 +8,6 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import ru.job4j.datetimeparsers.DateTimeParser;
-import ru.job4j.datetimeparsers.HabrCareerDateTimeParser;
 import ru.job4j.models.Post;
 
 import java.io.IOException;
@@ -24,25 +23,27 @@ public class HabrCareerParse implements Parse {
 
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer?page=", SOURCE_LINK);
 
-    private static final int COUNT_PAGE = 5;
+    private int countPage = 5;
 
     private final DateTimeParser dateTimeParser;
-
-    public static void main(String[] args) throws IOException {
-        Parse parser = new HabrCareerParse(new HabrCareerDateTimeParser());
-        List<Post> posts = IntStream.range(1, COUNT_PAGE - 1)
-                .mapToObj(i -> parser.list(PAGE_LINK + i))
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-        posts.forEach(System.out::println);
-    }
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
     }
 
     @Override
-    public List<Post> list(String link) {
+    public List<Post> list() {
+        return IntStream.range(1, countPage + 1)
+                .mapToObj(i -> readPage(PAGE_LINK + i))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+    }
+
+    public void setReadablePageCount(int count) {
+        this.countPage = count;
+    }
+
+    private List<Post> readPage(String link) {
         List<Post> posts = new ArrayList<>();
         Connection connection = Jsoup.connect(link);
         try {
