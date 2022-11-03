@@ -23,7 +23,9 @@ public class HabrCareerParse implements Parse {
 
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer?page=", SOURCE_LINK);
 
-    private int countPage = 5;
+    private static final int FIRST_PAGE = 1;
+
+    private static final int LAST_PAGER = 5;
 
     private final DateTimeParser dateTimeParser;
 
@@ -33,14 +35,10 @@ public class HabrCareerParse implements Parse {
 
     @Override
     public List<Post> list() {
-        return IntStream.range(1, countPage + 1)
+        return IntStream.range(FIRST_PAGE, LAST_PAGER + 1)
                 .mapToObj(i -> readPage(PAGE_LINK + i))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-    }
-
-    public void setReadablePageCount(int count) {
-        this.countPage = count;
     }
 
     private List<Post> readPage(String link) {
@@ -49,30 +47,33 @@ public class HabrCareerParse implements Parse {
         try {
             Document document = connection.get();
             Elements rows = document.select(".vacancy-card__inner");
-
-            rows.forEach(row -> {
-                Element titleElement = row.select(".vacancy-card__title").first();
-                String title = titleElement.text();
-
-                Element linkElement = titleElement.child(0);
-                String linkVacancy = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-
-                Element dateElement = row.select(".vacancy-card__date")
-                        .first()
-                        .child(0);
-                LocalDateTime created = dateTimeParser.parse(dateElement.attr("datetime"));
-
-                String description = retrieveDescription(linkVacancy);
-
-                posts.add(new Post(title, description, linkVacancy, created));
-            });
+            posts = rows.stream()
+                    .map(this::parsePost)
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }
         return posts;
     }
 
-    private static String retrieveDescription(String link) {
+    private Post parsePost(Element element) {
+        Element titleElement = element.select(".vacancy-card__title").first();
+        String title = titleElement.text();
+
+        Element linkElement = titleElement.child(0);
+        String linkVacancy = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+
+        Element dateElement = element.select(".vacancy-card__date")
+                .first()
+                .child(0);
+        LocalDateTime created = dateTimeParser.parse(dateElement.attr("datetime"));
+
+        String description = retrieveDescription(linkVacancy);
+
+        return new Post(title, description, linkVacancy, created);
+    }
+
+    private String retrieveDescription(String link) {
         StringJoiner description = new StringJoiner("");
         try {
             Connection connection = Jsoup.connect(link);
