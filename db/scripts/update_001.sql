@@ -1,10 +1,8 @@
-create table if not exists rabbit (
-    id serial primary key,
-    created_date timestamp
+create table if not exists post (
+    id serial,
+    name varchar(255),
+    description text,
+    link varchar(500),
+    created timestamp,
+    primary key (id, link)
 );
-
-select
-    r.created_date,
-    r."id"
-from
-    rabbit r;
