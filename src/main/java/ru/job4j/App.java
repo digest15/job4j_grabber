@@ -13,5 +13,6 @@ public class App {
        Scheduler scheduler = grab.scheduler();
        Store store = grab.store();
        grab.init(new HabrCareerParse(new HabrCareerDateTimeParser()), store, scheduler);
+       grab.web(store);
     }
 }

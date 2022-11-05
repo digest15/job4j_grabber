@@ -28,10 +28,10 @@ public class Post {
 
     @Override
     public String toString() {
-        return String.format("%s; %s; %s;\n%s",
+        return String.format("%s;\n%s;\n%s;\n%s\n",
+                created.format(DateTimeFormatter.ISO_DATE_TIME),
                 title,
                 link,
-                created.format(DateTimeFormatter.ISO_DATE_TIME),
                 description);
     }
 
