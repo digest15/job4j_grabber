@@ -17,7 +17,7 @@ import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
 
-    private static final String RABBIT_PROPERTIES_PATH = "rabbit.properties";
+    private static final String RABBIT_PROPERTIES_PATH = "app.properties";
     private static final String RABBIT_INTERVAL = "rabbit.interval";
 
     public static void main(String[] args) {

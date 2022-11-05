@@ -14,7 +14,7 @@ import static org.quartz.JobBuilder.*;
 import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
-public class GrabberSqlDb implements Grab {
+public class GrabberSqlStore implements Grab {
     private final Properties cfg = new Properties();
 
     public Store store() {
@@ -28,7 +28,7 @@ public class GrabberSqlDb implements Grab {
     }
 
     public void cfg() throws IOException {
-        try (InputStream in = GrabberSqlDb.class.getClassLoader().getResourceAsStream("app.properties")) {
+        try (InputStream in = GrabberSqlStore.class.getClassLoader().getResourceAsStream("app.properties")) {
             cfg.load(in);
         }
     }
